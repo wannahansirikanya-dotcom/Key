@@ -214,7 +214,78 @@ button{cursor:pointer}
   function limit(type,num){return limits.find(l=>l.key===limitKey(type,num))}
   function canAdd(type,num,amt){let l=limit(type,num), s=sold(type,num); if(!l)return {ok:true}; let remain=(+l.max)-s; return {ok:amt<=remain, remain, max:+l.max, sold:s}}
   function addOrMerge(type,pay,num,amt){let c=canAdd(type,num,amt);if(!c.ok){alert(`เลข ${num} ${type} เต็มแล้ว\\nอั้น ${c.max}\\nรับแล้ว ${c.sold}\\nเหลือ ${Math.max(c.remain,0)}`);return false}let f=bets.find(b=>b.type===type&&b.number===num&&b.pay===pay);if(f)f.amount+=amt;else bets.push({id:String(Date.now()+Math.random()),type,pay,number:num,amount:amt,payout:0,win:false});return true}
-  function addPrice(){let top=+topAmount.value||0,bottom=+bottomAmount.value||0;if(top<=0&&bottom<=0)return alert("ใส่ยอดบนหรือล่างก่อน");let added=0;selected.forEach(sel=>{let n=sel.digits===2?number.slice(-2):number.slice(0,3);if(n.length<sel.digits)return;if(sel.type==="2ตัวบน"&&top>0&&addOrMerge("สองตัวบน",70,n,top))added++;if(sel.type==="2ตัวล่าง"&&bottom>0&&addOrMerge("สองตัวล่าง",70,n,bottom))added++;if(sel.type==="2ตัวกลับ")perms(n).forEach(x=>{if(top>0&&addOrMerge("สองตัวบน",70,x,top))added++;if(bottom>0&&addOrMerge("สองตัวล่าง",70,x,bottom))added++});if(sel.type==="3ตัวบน"&&top>0&&addOrMerge("สามตัวบน",450,n,top))added++;if(sel.type==="3ตัวโต๊ด"&&top>0&&addOrMerge("สามตัวโต๊ด",100,n,top))added++;if(sel.type==="6กลับ")perms(n).forEach(x=>{if(top>0&&addOrMerge("หกกลับบน",100,x,top))added++;if(bottom>0&&addOrMerge("หกกลับล่าง",100,x,bottom))added++})}); if(added>0){number="";closePrice();save();renderDigits()}}
+  function addPrice(){
+  let top = +topAmount.value || 0;
+  let bottom = +bottomAmount.value || 0;
+
+  if(top <= 0 && bottom <= 0){
+    return alert("ใส่ยอดบนหรือล่างก่อน");
+  }
+
+  let pending = {};
+
+  function addPending(type, pay, num, amount){
+    const key = type + "_" + num + "_" + pay;
+
+    // กันซ้ำในรอบเดียว เช่น เลือก 2ตัวบน + 2ตัวกลับ
+    if(!pending[key]){
+      pending[key] = { type, pay, number:num, amount };
+    }
+  }
+
+  selected.forEach(sel => {
+    let n = sel.digits === 2
+      ? number.slice(-2)
+      : number.slice(0,3);
+
+    if(n.length < sel.digits) return;
+
+    if(sel.type === "2ตัวบน"){
+      if(top > 0) addPending("สองตัวบน", 70, n, top);
+    }
+
+    if(sel.type === "2ตัวล่าง"){
+      if(bottom > 0) addPending("สองตัวล่าง", 70, n, bottom);
+    }
+
+    if(sel.type === "2ตัวกลับ"){
+      perms(n).forEach(x => {
+        if(top > 0) addPending("สองตัวบน", 70, x, top);
+        if(bottom > 0) addPending("สองตัวล่าง", 70, x, bottom);
+      });
+    }
+
+    if(sel.type === "3ตัวบน"){
+      if(top > 0) addPending("สามตัวบน", 450, n, top);
+    }
+
+    if(sel.type === "3ตัวโต๊ด"){
+      if(top > 0) addPending("สามตัวโต๊ด", 100, n, top);
+    }
+
+    if(sel.type === "6กลับ"){
+      perms(n).forEach(x => {
+        if(top > 0) addPending("หกกลับบน", 100, x, top);
+        if(bottom > 0) addPending("หกกลับล่าง", 100, x, bottom);
+      });
+    }
+  });
+
+  let added = 0;
+
+  Object.values(pending).forEach(item => {
+    if(addOrMerge(item.type, item.pay, item.number, item.amount)){
+      added++;
+    }
+  });
+
+  if(added > 0){
+    number = "";
+    closePrice();
+    save();
+    renderDigits();
+  }
+}
   function saveLimit(){let type=$("limitType").value,num=$("limitNumber").value.replace(/\\D/g,""),max=+$("limitMax").value;if(!num||max<=0)return alert("ใส่เลขและยอดอั้นก่อน");let key=limitKey(type,num),old=limits.find(l=>l.key===key);if(old)old.max=max;else limits.push({key,type,number:num,max});localStorage.setItem(K_LIMITS,JSON.stringify(limits));$("limitNumber").value="";$("limitMax").value="";renderLimits()}
   window.deleteLimit=key=>{limits=limits.filter(l=>l.key!==key);localStorage.setItem(K_LIMITS,JSON.stringify(limits));renderLimits()};
   function renderLimits(){$("limitList").innerHTML=limits.length?limits.map(l=>{let s=sold(l.type,l.number),r=(+l.max)-s;return `<div class="limitItem"><div><b>${l.type}</b> ${l.number}<br>อั้น ${(+l.max).toLocaleString()} / รับแล้ว ${s.toLocaleString()} / เหลือ ${Math.max(r,0).toLocaleString()}</div><button onclick="deleteLimit('${l.key}')">ลบ</button></div>`}).join(""):`<div style="padding:12px;text-align:center;color:#777">ยังไม่มีรายการอั้นเลข</div>`}
