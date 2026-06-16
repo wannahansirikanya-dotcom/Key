@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ระบบคีย์หวยรัฐบาล</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Tahoma,sans-serif;background:linear-gradient(90deg,#611005,#b85f1e,#611005)}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+.app{max-width:500px;margin:0 auto;min-height:100vh;background:#fff;display:flex}
+.side{width:138px;background:#20252d;color:white;padding:8px 6px;overflow:auto}
+.side button{width:100%;border:0;border-radius:7px;padding:9px 4px;margin-bottom:8px;color:white;font-weight:900}
+.price{background:#9d262b}.limit{background:#1679f2}.check{background:#168b50}.view{background:#ff8d24!important;color:#111!important}
+.sideTitle{color:#ff8d24;font-size:22px;font-weight:900;border-bottom:2px dashed #ff8d24;padding-bottom:7px}
+.badge{background:white;color:#111;border-radius:9px;text-align:center;margin:12px auto;padding:7px;width:88px;font-weight:900}
+.group{margin:16px 0}
+.groupTitle{display:inline-block;background:#1679f2;color:white;border-radius:8px;padding:7px 10px;font-size:15px;font-weight:900;margin-bottom:8px}
+.betRow{display:grid;grid-template-columns:24px 1fr 24px;align-items:center;gap:4px;color:white;margin:9px 0;font-size:23px}
+.betRow .num{font-size:26px}
+.betRow button{background:transparent;border:0;color:white;font-size:30px;padding:0;margin:0}
+.remain{font-size:11px;color:#ffe176}
+.main{flex:1;padding:10px;overflow:auto}
+.name{width:100%;border:2px solid #c91f2e;border-radius:8px;padding:11px;text-align:center;font-size:17px;font-weight:900;margin-bottom:8px}
+.head{width:100%;border:0;border-radius:10px;background:linear-gradient(#f13d4a,#ca202c);color:#fff8d9;padding:13px;font-size:22px;font-weight:900;margin-bottom:9px}
+.mode{border:2px solid #c91f2e;background:white;color:#c91f2e;border-radius:8px;padding:12px;font-size:20px;font-weight:900;width:100%;margin-bottom:10px;box-shadow:0 5px 0 rgba(0,0,0,.18)}
+.mode:active{transform:translateY(5px);box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.type{border:0;border-radius:8px;min-height:50px;color:white;font-size:17px;font-weight:900;display:flex;justify-content:space-between;align-items:center;overflow:hidden;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.type span{align-self:stretch;min-width:46px;background:white;color:inherit;display:flex;align-items:center;justify-content:center}
+.type:active{transform:translateY(6px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.type.selected{outline:3px solid #ffcf33;filter:brightness(.92)}
+.red{background:#df3145}.blue{background:#1379f2}.green{background:#168b50}.black{background:#20252d!important}
+.panel{margin-top:12px;border:2px solid #ddd;background:#fafafa;padding:10px;text-align:center}
+.panel h3{margin:2px 0 10px;font-size:22px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-height:34px}
+.chip{background:#1679f2;color:white;border-radius:8px;padding:6px 10px;font-weight:900;font-size:15px}
+.digits{display:flex;justify-content:center;gap:12px;margin:32px 0 15px}
+.digit{width:50px;height:58px;border:2px solid #df3145;background:white;font-size:29px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+.keypad button{border:2px solid #d52a38;background:white;color:#d52a38;border-radius:9px;font-size:20px;font-weight:900;padding:14px 0;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.keypad button:active{transform:translateY(3px);box-shadow:inset 0 3px 8px rgba(0,0,0,.22)}
+.action{width:100%;border:0;border-radius:9px;background:#df3145;color:white;padding:13px;margin-top:10px;font-size:20px;font-weight:900}
+.summary{background:#20252d;color:white;border-radius:8px;padding:11px;margin-top:12px;line-height:1.8}
+.profit{color:#38d96f;font-weight:900}.loss{color:#ff5252;font-weight:900}
+.bottom{position:sticky;bottom:0;background:white;padding-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.saved{margin-top:10px;border:1px solid #ddd;border-radius:8px;padding:8px;background:#fffdf5;font-size:13px}
+.saved h4{margin:0 0 6px;color:#c91f2e}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:99;display:none;align-items:center;justify-content:center;padding:14px}
+.modal.show{display:flex}
+.box{width:100%;max-width:440px;max-height:90vh;overflow:auto;background:white;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.boxHead{height:58px;background:#df242f;color:#fff8d9;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:24px;font-weight:900;position:sticky;top:0;z-index:2}
+.close{border:0;background:transparent;color:#fff8d9;font-size:42px}
+.boxBody{padding:14px}
+.boxBody input,.boxBody select{width:100%;border:2px solid #ddd;border-radius:8px;padding:13px;text-align:center;font-size:18px;font-weight:900}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.amountBtns{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:13px}
+.amountBtns button{border:2px solid #df242f;background:white;color:#df242f;border-radius:8px;padding:10px 0;font-size:20px;font-weight:900}
+.modalActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.modalActions button{border:0;border-radius:8px;color:white;padding:13px;font-size:19px;font-weight:900}
+.cancel{background:#df3145}.confirm{background:#168b50}
+.numTag{background:#168b50;color:white;padding:10px 15px;border-radius:6px;font-size:26px;font-weight:900}
+.center{text-align:center;margin-bottom:12px;font-weight:900}
+.limitItem,.slipItem{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #eee;font-size:13px}
+.limitItem button,.slipItem button{border:0;background:#df3145;color:white;border-radius:6px;padding:7px 10px;margin-left:4px}
+.resultList,.slipDetail{max-height:320px;overflow:auto;border-top:1px solid #ddd;margin-top:10px;font-size:13px}
+.win{color:#168b50;font-weight:900}.lose{color:#777}
+.small{font-size:12px;color:#777;margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <button class="price" id="openPriceSide">✎ ใส่ราคา</button>
+    <button class="limit" id="openLimit">ตั้งอั้นเลข</button>
+    <button class="check" id="openCheck">ตรวจผล</button>
+    <button class="view" id="openSlips">ดูโพย</button>
+    <div class="sideTitle">รายการแทง</div>
+    <div class="badge"><span id="sideCount">0</span> รายการ</div>
+    <div id="leftList"></div>
+    <div style="font-size:13px;line-height:1.7;color:#f5e8ca;margin-top:10px">ยอดขาย<br><b id="sideSale">0</b> บาท<br>โพยถัดไป<br><b id="slipNo">1</b></div>
+  </aside>
+
+  <main class="main">
+    <input id="slipName" class="name" placeholder="ใส่ชื่อโพย เช่น ลูกค้า A">
+    <button class="head" type="button" id="openSlipsMain">👁 เปิดรายการแทง / ดูโพย</button>
+    <button class="mode" type="button">กดเลขเอง</button>
+
+    <div class="grid">
+      <button class="type red" data-type="3ตัวบน" data-pay="450" data-digits="3">3ตัวบน <span>450</span></button>
+      <button class="type red" data-type="3ตัวโต๊ด" data-pay="100" data-digits="3">3ตัวโต๊ด <span>100</span></button>
+      <button class="type blue" data-type="2ตัวบน" data-pay="70" data-digits="2">2ตัวบน <span>70</span></button>
+      <button class="type blue" data-type="2ตัวล่าง" data-pay="70" data-digits="2">2ตัวล่าง <span>70</span></button>
+      <button class="type red" data-type="6กลับ" data-pay="100" data-digits="3">6กลับ <span>🔀</span></button>
+      <button class="type blue" data-type="2ตัวกลับ" data-pay="70" data-digits="2">2ตัวกลับ <span>🔀</span></button>
+    </div>
+
+    <section class="panel">
+      <h3>รายการที่เลือก</h3>
+      <div class="chips" id="chips"></div>
+      <div class="digits" id="digitBoxes"></div>
+      <div class="keypad">
+        <button data-num="1">1</button><button data-num="2">2</button><button data-num="3">3</button>
+        <button data-num="4">4</button><button data-num="5">5</button><button data-num="6">6</button>
+        <button data-num="7">7</button><button data-num="8">8</button><button data-num="9">9</button>
+        <button id="randomBtn">สุ่มเลข</button><button data-num="0">0</button><button id="backBtn" class="black">⌫</button>
+      </div>
+      <button class="action" id="openPriceMain">ใส่ราคา</button>
+      <button class="action green" id="openCheckMain">ตรวจผล / กำไรขาดทุน</button>
+    </section>
+
+    <div class="summary">
+      ชื่อโพย: <span id="showName">-</span><br>
+      ยอดขาย: <span id="sale">0</span> บาท<br>
+      จำนวนรายการ: <span id="count">0</span><br>
+      ยอดจ่ายล่าสุด: <span id="lastPayout">0</span> บาท<br>
+      กำไร/ขาดทุนล่าสุด: <span id="lastProfit" class="profit">0</span> บาท
+    </div>
+
+    <div class="bottom">
+      <button class="action" id="clearBtn">ล้างโพยนี้</button>
+      <button class="action green" id="sendBtn">✓ ส่งโพย</button>
+    </div>
+
+    <div class="saved"><h4>โพยที่ส่งแล้ว</h4><div id="savedList">ยังไม่มีโพยที่ส่ง</div></div>
+  </main>
+</div>
+
+<div class="modal" id="priceModal">
+  <div class="box">
+    <div class="boxHead"><div>½ ใส่ราคา</div><button class="close" id="closePrice">×</button></div>
+    <div class="boxBody">
+      <div class="center">เลข <span class="numTag" id="modalNumber">--</span></div>
+      <div class="row"><input id="topAmount" type="number" placeholder="ยอดบน"><input id="bottomAmount" type="number" placeholder="ยอดล่าง"></div>
+      <div class="amountBtns"><button data-amt="5">5</button><button data-amt="10">10</button><button data-amt="20">20</button><button data-amt="50">50</button><button data-amt="100">100</button></div>
+      <div class="small">แตะช่องยอดบน/ล่างก่อน แล้วกดจำนวนเงิน</div>
+      <div class="modalActions"><button class="cancel" id="cancelPrice">ยกเลิก</button><button class="confirm" id="confirmPrice">ใส่ยอดแทง</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="limitModal">
+  <div class="box">
+    <div class="boxHead"><div>ตั้งอั้นเลข</div><button class="close" id="closeLimit">×</button></div>
+    <div class="boxBody">
+      <select id="limitType">
+        <option value="สองตัวบน">สองตัวบน</option><option value="สองตัวล่าง">สองตัวล่าง</option>
+        <option value="สามตัวบน">สามตัวบน</option><option value="สามตัวโต๊ด">สามตัวโต๊ด</option>
+        <option value="หกกลับบน">หกกลับบน</option><option value="หกกลับล่าง">หกกลับล่าง</option>
+      </select>
+      <div class="row"><input id="limitNumber" inputmode="numeric" placeholder="เลข"><input id="limitMax" type="number" placeholder="ยอดอั้น"></div>
+      <button class="action green" id="saveLimit">บันทึกอั้นเลข</button>
+      <div id="limitList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="checkModal">
+  <div class="box">
+    <div class="boxHead"><div>ตรวจผล</div><button class="close" id="closeCheck">×</button></div>
+    <div class="boxBody">
+      <div class="row"><input id="result3" inputmode="numeric" maxlength="3" placeholder="3 ตัวบน"><input id="result2bottom" inputmode="numeric" maxlength="2" placeholder="2 ตัวล่าง"></div>
+      <button class="action green" id="checkResult">ตรวจผล / คำนวณ</button>
+      <div class="summary" style="margin-top:10px">
+        ยอดขาย: <span id="checkSale">0</span> บาท<br>
+        ยอดจ่าย: <span id="checkPayout">0</span> บาท<br>
+        กำไร/ขาดทุน: <span id="checkProfit" class="profit">0</span> บาท
+      </div>
+      <div class="resultList" id="winnerList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="slipsModal">
+  <div class="box">
+    <div class="boxHead"><div>ดูโพย</div><button class="close" id="closeSlips">×</button></div>
+    <div class="boxBody">
+      <div id="slipsList"></div>
+      <div class="slipDetail" id="slipDetail"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const K_BETS="thai_lotto_bets_v1", K_SLIPS="thai_lotto_slips_v1", K_NAME="thai_lotto_name_v1", K_LIMITS="thai_lotto_limits_v1", K_LAST="thai_lotto_result_v1";
+  let selected=[], number="", bets=JSON.parse(localStorage.getItem(K_BETS)||"[]"), slips=JSON.parse(localStorage.getItem(K_SLIPS)||"[]"), limits=JSON.parse(localStorage.getItem(K_LIMITS)||"[]"), amountFocus="top";
+  let lastResult=JSON.parse(localStorage.getItem(K_LAST)||'{"sale":0,"payout":0,"profit":0}');
+  const $=id=>document.getElementById(id), name=$("slipName"), priceModal=$("priceModal"), limitModal=$("limitModal"), checkModal=$("checkModal"), slipsModal=$("slipsModal"), topAmount=$("topAmount"), bottomAmount=$("bottomAmount");
+  name.value=localStorage.getItem(K_NAME)||"";
+  name.oninput=()=>{localStorage.setItem(K_NAME,name.value);render()};
+  document.querySelectorAll(".type").forEach(btn=>btn.onclick=()=>{let item={type:btn.dataset.type,pay:+btn.dataset.pay,digits:+btn.dataset.digits};let i=selected.findIndex(x=>x.type===item.type);if(i>=0){selected.splice(i,1);btn.classList.remove("selected")}else{selected.push(item);btn.classList.add("selected")}number="";renderSelected();renderDigits()});
+  document.querySelectorAll("[data-num]").forEach(btn=>btn.onclick=()=>pressNum(btn.dataset.num));
+  $("backBtn").onclick=()=>{number=number.slice(0,-1);renderDigits()};
+  $("randomBtn").onclick=()=>{if(!selected.length)return alert("เลือกเมนูก่อน");number=Array.from({length:maxDigits()},()=>Math.floor(Math.random()*10)).join("");renderDigits()};
+  $("openPriceSide").onclick=openPrice;$("openPriceMain").onclick=openPrice;$("closePrice").onclick=closePrice;$("cancelPrice").onclick=closePrice;$("confirmPrice").onclick=addPrice;
+  $("openLimit").onclick=()=>{limitModal.classList.add("show");renderLimits()};$("closeLimit").onclick=()=>limitModal.classList.remove("show");$("saveLimit").onclick=saveLimit;
+  $("openCheck").onclick=openCheck;$("openCheckMain").onclick=openCheck;$("closeCheck").onclick=()=>checkModal.classList.remove("show");$("checkResult").onclick=checkResult;
+  $("openSlips").onclick=openSlips;$("openSlipsMain").onclick=openSlips;$("closeSlips").onclick=()=>slipsModal.classList.remove("show");
+  $("clearBtn").onclick=clearCurrent;$("sendBtn").onclick=sendSlip;
+  topAmount.onfocus=()=>amountFocus="top";bottomAmount.onfocus=()=>amountFocus="bottom";
+  document.querySelectorAll("[data-amt]").forEach(btn=>btn.onclick=()=>{if(amountFocus==="bottom")bottomAmount.value=btn.dataset.amt;else topAmount.value=btn.dataset.amt});
+  function maxDigits(){return selected.some(x=>x.digits===3)?3:selected.some(x=>x.digits===2)?2:1}
+  function minDigits(){return selected.length?Math.min(...selected.map(x=>x.digits)):0}
+  function pressNum(n){if(!selected.length)return alert("เลือกเมนูก่อน");if(number.length<maxDigits()){number+=n;renderDigits()}}
+  function renderSelected(){$("chips").innerHTML=selected.length?selected.map(x=>`<span class="chip">${x.type}</span>`).join(""):`<span class="chip">ยังไม่ได้เลือก</span>`}
+  function renderDigits(){let len=selected.length?maxDigits():2;$("digitBoxes").innerHTML=Array.from({length:len},(_,i)=>`<div class="digit">${number[i]||""}</div>`).join("")}
+  function openPrice(){if(!selected.length)return alert("เลือกเมนูก่อน");if(number.length<minDigits())return alert("กดเลขให้ครบก่อน");$("modalNumber").textContent=number;topAmount.value="";bottomAmount.value="";amountFocus="top";priceModal.classList.add("show");setTimeout(()=>topAmount.focus(),80)}
+  function closePrice(){priceModal.classList.remove("show")}
+  function perms(str){if(!str)return[];if(str.length<=1)return[str];let out=[];for(let i=0;i<str.length;i++)perms(str.slice(0,i)+str.slice(i+1)).forEach(p=>out.push(str[i]+p));return[...new Set(out)]}
+  function limitKey(type,num){return (type==="หกกลับบน"||type==="หกกลับล่าง")?type+":"+perms(num).sort().join(""):type+":"+num}
+  function sold(type,num){let key=limitKey(type,num);return bets.filter(b=>limitKey(b.type,b.number)===key).reduce((s,b)=>s+(+b.amount),0)}
+  function limit(type,num){return limits.find(l=>l.key===limitKey(type,num))}
+  function canAdd(type,num,amt){let l=limit(type,num), s=sold(type,num); if(!l)return {ok:true}; let remain=(+l.max)-s; return {ok:amt<=remain, remain, max:+l.max, sold:s}}
+  function addOrMerge(type,pay,num,amt){let c=canAdd(type,num,amt);if(!c.ok){alert(`เลข ${num} ${type} เต็มแล้ว\\nอั้น ${c.max}\\nรับแล้ว ${c.sold}\\nเหลือ ${Math.max(c.remain,0)}`);return false}let f=bets.find(b=>b.type===type&&b.number===num&&b.pay===pay);if(f)f.amount+=amt;else bets.push({id:String(Date.now()+Math.random()),type,pay,number:num,amount:amt,payout:0,win:false});return true}
+  function addPrice(){let top=+topAmount.value||0,bottom=+bottomAmount.value||0;if(top<=0&&bottom<=0)return alert("ใส่ยอดบนหรือล่างก่อน");let added=0;selected.forEach(sel=>{let n=sel.digits===2?number.slice(-2):number.slice(0,3);if(n.length<sel.digits)return;if(sel.type==="2ตัวบน"&&top>0&&addOrMerge("สองตัวบน",70,n,top))added++;if(sel.type==="2ตัวล่าง"&&bottom>0&&addOrMerge("สองตัวล่าง",70,n,bottom))added++;if(sel.type==="2ตัวกลับ")perms(n).forEach(x=>{if(top>0&&addOrMerge("สองตัวบน",70,x,top))added++;if(bottom>0&&addOrMerge("สองตัวล่าง",70,x,bottom))added++});if(sel.type==="3ตัวบน"&&top>0&&addOrMerge("สามตัวบน",450,n,top))added++;if(sel.type==="3ตัวโต๊ด"&&top>0&&addOrMerge("สามตัวโต๊ด",100,n,top))added++;if(sel.type==="6กลับ")perms(n).forEach(x=>{if(top>0&&addOrMerge("หกกลับบน",100,x,top))added++;if(bottom>0&&addOrMerge("หกกลับล่าง",100,x,bottom))added++})}); if(added>0){number="";closePrice();save();renderDigits()}}
+  function saveLimit(){let type=$("limitType").value,num=$("limitNumber").value.replace(/\\D/g,""),max=+$("limitMax").value;if(!num||max<=0)return alert("ใส่เลขและยอดอั้นก่อน");let key=limitKey(type,num),old=limits.find(l=>l.key===key);if(old)old.max=max;else limits.push({key,type,number:num,max});localStorage.setItem(K_LIMITS,JSON.stringify(limits));$("limitNumber").value="";$("limitMax").value="";renderLimits()}
+  window.deleteLimit=key=>{limits=limits.filter(l=>l.key!==key);localStorage.setItem(K_LIMITS,JSON.stringify(limits));renderLimits()};
+  function renderLimits(){$("limitList").innerHTML=limits.length?limits.map(l=>{let s=sold(l.type,l.number),r=(+l.max)-s;return `<div class="limitItem"><div><b>${l.type}</b> ${l.number}<br>อั้น ${(+l.max).toLocaleString()} / รับแล้ว ${s.toLocaleString()} / เหลือ ${Math.max(r,0).toLocaleString()}</div><button onclick="deleteLimit('${l.key}')">ลบ</button></div>`}).join(""):`<div style="padding:12px;text-align:center;color:#777">ยังไม่มีรายการอั้นเลข</div>`}
+  window.deleteBetByGroup=(type,num)=>{bets=bets.filter(b=>!(b.type===type&&b.number===num));save()};
+  function clearCurrent(){if(confirm("ล้างโพยนี้ทั้งหมด?")){bets=[];save()}}
+  function sendSlip(){if(!bets.length)return alert("ยังไม่มีรายการในโพย");let no=slips.length+1,n=name.value.trim()||`โพยที่ ${no}`,total=bets.reduce((s,b)=>s+(+b.amount),0);slips.push({no,name:n,total,date:new Date().toLocaleString("th-TH"),items:JSON.parse(JSON.stringify(bets))});bets=[];localStorage.setItem(K_SLIPS,JSON.stringify(slips));save();alert(`ส่งโพยที่ ${no} แล้ว\\nชื่อโพย: ${n}`)}
+  function save(){localStorage.setItem(K_BETS,JSON.stringify(bets));render()}
+  function openCheck(){checkModal.classList.add("show");renderCheck()}
+  function checkResult(){
+    let r3=$("result3").value.trim(), rb=$("result2bottom").value.trim();
+    if(r3.length!==3)return alert("ใส่ 3 ตัวบนให้ครบ");
+    if(rb.length!==2)return alert("ใส่ 2 ตัวล่างให้ครบ");
+    let r2=r3.slice(-2), sale=0,payout=0, rows=[];
+    bets.forEach(b=>{
+      sale+=+b.amount; let win=false;
+      if(b.type==="สามตัวบน"&&b.number===r3)win=true;
+      if(b.type==="สามตัวโต๊ด"&&perms(r3).includes(b.number))win=true;
+      if(b.type==="สองตัวบน"&&b.number===r2)win=true;
+      if(b.type==="สองตัวล่าง"&&b.number===rb)win=true;
+      if(b.type==="หกกลับบน"&&b.number===r3)win=true;
+      if(b.type==="หกกลับล่าง"&&b.number===rb)win=true;
+      b.win=win;b.payout=win?(+b.amount)*(+b.pay):0;payout+=b.payout;rows.push({...b});
+    });
+    lastResult={sale,payout,profit:sale-payout, date:new Date().toLocaleString("th-TH"), result3:r3, bottom2:rb};
+    localStorage.setItem(K_LAST,JSON.stringify(lastResult));
+    save();renderCheck(rows);
+  }
+  function renderCheck(rows){let sale=lastResult.sale||0,payout=lastResult.payout||0,profit=sale-payout;$("checkSale").textContent=sale.toLocaleString();$("checkPayout").textContent=payout.toLocaleString();$("checkProfit").textContent=profit.toLocaleString();$("checkProfit").className=profit>=0?"profit":"loss";$("winnerList").innerHTML=rows?rows.map(b=>`<div style="padding:7px;border-bottom:1px solid #eee" class="${b.win?'win':'lose'}">${b.type} ${b.number} แทง ${(+b.amount).toLocaleString()} ${b.win?`ถูก จ่าย ${b.payout.toLocaleString()}`:"ไม่ถูก"}</div>`).join(""):"กดตรวจผลเพื่อดูรายการ"}
+  function openSlips(){slipsModal.classList.add("show");renderSlipsModal()}
+  window.viewSlip=no=>{let s=slips.find(x=>x.no===no);if(!s)return;$("slipDetail").innerHTML=`<h3>โพยที่ ${s.no} ${s.name}</h3><div>${s.date}</div><b>ยอดรวม ${(+s.total).toLocaleString()} บาท</b>${s.items.map((b,i)=>`<div style="padding:6px;border-bottom:1px solid #eee">${i+1}. ${b.type} ${b.number} = ${(+b.amount).toLocaleString()}</div>`).join("")}`};
+  window.deleteSlip=no=>{if(confirm("ลบโพยนี้?")){slips=slips.filter(s=>s.no!==no);localStorage.setItem(K_SLIPS,JSON.stringify(slips));render();renderSlipsModal();$("slipDetail").innerHTML=""}};
+  function renderSlipsModal(){$("slipsList").innerHTML=slips.length?slips.slice().reverse().map(s=>`<div class="slipItem"><div><b>โพยที่ ${s.no}</b> ${s.name}<br>${s.date}<br>${s.items.length} รายการ / ${(+s.total).toLocaleString()} บาท</div><div><button style="background:#1679f2" onclick="viewSlip(${s.no})">ดู</button><button onclick="deleteSlip(${s.no})">ลบ</button></div></div>`).join(""):"ยังไม่มีโพยที่ส่ง"}
+  function order(t){let a=["สองตัวบน","สองตัวล่าง","สามตัวบน","สามตัวโต๊ด","หกกลับบน","หกกลับล่าง"];let i=a.indexOf(t);return i<0?99:i}
+  function renderLeft(){let g={};bets.forEach(b=>{(g[b.type]||(g[b.type]=[])).push(b)});$("leftList").innerHTML=Object.keys(g).sort((a,b)=>order(a)-order(b)).map(type=>`<div class="group"><div class="groupTitle">${type}</div>${g[type].map((b,i)=>{let l=limit(b.type,b.number),r=l?Math.max((+l.max)-sold(b.type,b.number),0):null;return `<div class="betRow"><div>${i+1}.</div><div class="num">${b.number}${r!==null?`<div class="remain">เหลือ ${r}</div>`:""}</div><button onclick="deleteBetByGroup('${b.type}','${b.number}')">×</button></div>`}).join("")}</div>`).join("")||`<div style="color:#ddd;font-size:12px;margin-top:12px">ยังไม่มีรายการ</div>`}
+  function renderSaved(){$("savedList").innerHTML=slips.length?slips.slice().reverse().slice(0,5).map(s=>`<div style="border-top:1px solid #ddd;padding:6px 0"><b>โพยที่ ${s.no}</b> ${s.name}<br>${s.date}<br>${s.items.length} รายการ / ${(+s.total).toLocaleString()} บาท</div>`).join(""):"ยังไม่มีโพยที่ส่ง"}
+  function render(){let total=bets.reduce((s,b)=>s+(+b.amount),0);$("sideCount").textContent=bets.length;$("count").textContent=bets.length;$("sale").textContent=total.toLocaleString();$("sideSale").textContent=total.toLocaleString();$("slipNo").textContent=slips.length+1;$("showName").textContent=name.value||"-";$("lastPayout").textContent=(lastResult.payout||0).toLocaleString();let pf=lastResult.profit||0;$("lastProfit").textContent=pf.toLocaleString();$("lastProfit").className=pf>=0?"profit":"loss";renderLeft();renderSaved();renderLimits()}
+  renderSelected();renderDigits();render();
+})();
+</script>
+</body>
+</html>
